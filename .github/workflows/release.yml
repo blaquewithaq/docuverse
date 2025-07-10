@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun
+            ~/.cache/bun
+            node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun builder
+
+      - name: Test
+        run: bun test
+
+      - name: Package
+        run: |
+          PACKAGE_NAME=$(jq -r '.name' package.json)
+          PACKAGE_VERSION=$(jq -r '.version' package.json)
+
+          cd dist
+          tar -czvf ../$PACKAGE_NAME-$PACKAGE_VERSION.tar.gz .
+          zip -r ../$PACKAGE_NAME-$PACKAGE_VERSION.zip .
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bun release
