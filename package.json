@@ -9,13 +9,13 @@
     "email": "blaquewithaq@gmail.com"
   },
   "license": "MIT",
-  "homepage": "https://github.com/blaquwithaq/docuverse",
+  "homepage": "https://github.com/blaquewithaq/docuverse",
   "repository": {
     "type": "git",
-    "url": "https://github.com/blaquwithaq/docuverse.git"
+    "url": "https://github.com/blaquewithaq/docuverse.git"
   },
   "bugs": {
-    "url": "https://github.com/blaquwithaq/docuverse/issues"
+    "url": "https://github.com/blaquewithaq/docuverse/issues"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
