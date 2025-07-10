@@ -67,7 +67,7 @@ export function displayConsola(): void {
 
   consola.spinner().start("Loading...")
   setTimeout(() => {
-    consola.spinner().succeed("Loading complete!")
+    consola.spinner().success("Loading complete!")
   }, 2000)
 }
 

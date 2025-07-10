@@ -13,5 +13,5 @@ export async function openIssue(): Promise<void> {
 
   await open(url)
 
-  spinner.succeed("Issue opened successfully.")
+  spinner.success("Issue opened successfully.")
 }

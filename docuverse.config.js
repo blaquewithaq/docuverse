@@ -1,4 +1,5 @@
-export default {
+/** @type {import('docuverse').Config} */
+const config = {
   run: {
     doxygen: {
       input: "tests",
@@ -32,3 +33,5 @@ export default {
     },
   },
 }
+
+export default config

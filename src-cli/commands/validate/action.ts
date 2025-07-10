@@ -95,7 +95,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
     scanSpinner.fail("No json files found.\n")
   }
   else {
-    scanSpinner.succeed(`Found ${allFiles.length} json file(s).`)
+    scanSpinner.success(`Found ${allFiles.length} json file(s).`)
   }
 
   const validateSpinner = consola.spinner().start("Validating files...")
@@ -155,7 +155,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
     }
   }
 
-  validateSpinner.succeed("Finished validation.")
+  validateSpinner.success("Finished validation.")
 
   const writeSpinner = consola.spinner().start("Writing validation results...")
 
@@ -209,7 +209,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
     }
   }
 
-  writeSpinner.succeed("Finished writing validation results.")
+  writeSpinner.success("Finished writing validation results.")
 
   const validCount = allResults.filter(r => r.result === "valid").length
   const invalidCount = allResults.filter(r => r.result === "invalid").length

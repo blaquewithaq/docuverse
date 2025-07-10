@@ -52,5 +52,5 @@ export async function action(instance: Command, config: Config): Promise<void> {
     consola.debug(`\n\n${result.output}`)
   }
 
-  spinner.succeed(`Doxygen completed successfully: ${useColor("white", output)}`)
+  spinner.success(`Doxygen completed successfully: ${useColor("white", output)}`)
 }

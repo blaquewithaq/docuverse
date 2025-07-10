@@ -93,7 +93,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
     return
   }
   else {
-    scanSpinner.succeed(`Found ${allFiles.length} xml file(s).`)
+    scanSpinner.success(`Found ${allFiles.length} xml file(s).`)
   }
 
   const parseSpinner = consola.spinner().start("Parsing xml files...")
@@ -153,7 +153,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
     }
   }
 
-  parseSpinner.succeed("Finished parsing all xml files.")
+  parseSpinner.success("Finished parsing all xml files.")
 
   const writeSpinner = consola.spinner().start("Writing parsed data to output file...")
 
@@ -225,5 +225,5 @@ export async function action(instance: Command, config: Config): Promise<void> {
     }
   }
 
-  writeSpinner.succeed("Finished writing parsed data to output files.")
+  writeSpinner.success("Finished writing parsed data to output files.")
 }

@@ -23,7 +23,7 @@ export class Spinner {
     return this
   }
 
-  public succeed(text?: string): this {
+  public success(text?: string): this {
     this.spinner.stopAndPersist({
       text: useColor("success", text),
       symbol: useIcon("success", "success"),
@@ -66,7 +66,7 @@ export function displaySpinners(): void {
   spinner.start()
 
   setTimeout(() => {
-    spinner.succeed("Done!")
+    spinner.success("Done!")
   }, 2000)
   setTimeout(() => {
     spinner.fail("Failed to load!")

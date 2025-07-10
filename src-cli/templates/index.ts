@@ -7,23 +7,46 @@ import basicPage from "./basic/page.md"
 export type TemplateCategory = "basic"
 export type TemplateName = "doxyfile" | "index" | "directory" | "page"
 
-export interface Templates {
-  doxyfile: string
-  index: string
-  directory: string
-  page: string
+export interface Template {
+  name: TemplateName
+  ext: string
+  content: string
 }
 
-export async function getTemplates(category: TemplateCategory): Promise<Templates> {
+export async function getTemplates(category: TemplateCategory): Promise<Template[]> {
   switch (category) {
     case "basic":
-      return {
-        doxyfile: await readFile(basicDoxyfile, "utf-8"),
-        index: await readFile(basicIndex, "utf-8"),
-        directory: await readFile(basicDirectory, "utf-8"),
-        page: await readFile(basicPage, "utf-8"),
-      }
+      return [
+        {
+          name: "doxyfile",
+          ext: ".md",
+          content: await readFile(basicDoxyfile, "utf-8"),
+        },
+        {
+          name: "index",
+          ext: ".md",
+          content: await readFile(basicIndex, "utf-8"),
+        },
+        {
+          name: "directory",
+          ext: ".md",
+          content: await readFile(basicDirectory, "utf-8"),
+        },
+        {
+          name: "page",
+          ext: ".md",
+          content: await readFile(basicPage, "utf-8"),
+        },
+      ]
     default:
       throw new Error(`Unknown template category: ${category}`)
   }
+}
+
+export async function getTemplate(
+  category: TemplateCategory,
+  name: TemplateName,
+): Promise<Template | undefined> {
+  const templates = await getTemplates(category)
+  return templates.find(t => t.name === name)
 }

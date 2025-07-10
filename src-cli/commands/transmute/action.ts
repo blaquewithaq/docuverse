@@ -4,7 +4,7 @@ import type { TemplateCategory } from "../../templates"
 import type { Value } from "../../types/data"
 import { transmuteMapping } from "."
 import { consola, promptWithEnquirer } from "../../consola"
-import { getTemplates } from "../../templates"
+import { getTemplate } from "../../templates"
 import { handleMultipleInputs } from "../../utils/input"
 
 export async function action(instance: Command, config: Config): Promise<void> {
@@ -29,9 +29,9 @@ export async function action(instance: Command, config: Config): Promise<void> {
   const output = args[1] as string
   const verbose = options.verbose === true
 
-  const templates = await getTemplates(options.preset as TemplateCategory)
+  const templates = await getTemplate(options.preset as TemplateCategory, "index")
 
-  console.log(templates.index)
+  console.log(templates)
 
   consola.log(`Transmuting files from ${input.join(", ")} to ${output}...`, verbose)
 }
