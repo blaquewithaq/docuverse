@@ -1,8 +1,9 @@
 import type { Command } from "commander"
 import type { Config } from "../../config"
 import type { Value } from "../../types/data"
-import { readdir, readFile, stat } from "node:fs/promises"
-import { extname, join, resolve } from "node:path"
+import type { ValidationError } from "~/src"
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises"
+import { basename, extname, join, resolve } from "node:path"
 import { useValidator } from "~/src"
 import { validateMapping } from "."
 import { consola, promptWithEnquirer, useColor } from "../../consola"
@@ -26,37 +27,6 @@ async function collectJsonFiles(dir: string): Promise<string[]> {
   return files
 }
 
-async function validateFile(filePath: string, verbose: boolean): Promise<{
-  valid: boolean
-  error?: string
-}> {
-  try {
-    const source = await readFile(filePath, "utf-8")
-    const { valid, error } = await useValidator(source, filePath)
-
-    if (!valid || error) {
-      if (verbose) {
-        let str = `Invalid: ${filePath}`
-
-        if (error)
-          str = `${str}:\n${useColor("muted", error)}`
-
-        consola.error(str)
-      }
-      return { valid: false, error }
-    }
-
-    if (verbose) {
-      consola.success(`Valid: ${filePath}`)
-    }
-
-    return { valid: true }
-  }
-  catch (error) {
-    return { valid: false, error: error instanceof Error ? error.message : String(error) }
-  }
-}
-
 export async function action(instance: Command, config: Config): Promise<void> {
   const _config = config.validate ?? {}
   const configInput = Array.isArray(_config.input)
@@ -76,7 +46,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
   )
 
   const input = handleMultipleInputs(args[0])
-  const _output = args[1] as string
+  const output = args[1] as string
   const verbose = options.verbose === true
 
   const scanSpinner = consola.spinner().start("Scanning for json files...")
@@ -130,20 +100,119 @@ export async function action(instance: Command, config: Config): Promise<void> {
 
   const validateSpinner = consola.spinner().start("Validating files...")
 
-  let validCount = 0
-  let invalidCount = 0
+  const allResults: {
+    file: string
+    result: "valid" | "invalid"
+    errors?: ValidationError[]
+  }[] = []
 
-  for (let i = 0; i < allFiles.length; i++) {
-    const file = allFiles[i] as string
-    const { valid } = await validateFile(file, verbose)
+  for (const file of allFiles) {
+    const source = await readFile(file, "utf-8")
+    const { valid, errors } = await useValidator(source, file)
 
-    if (valid)
-      validCount++
-    else invalidCount++
+    allResults.push({
+      file,
+      result: valid ? "valid" : "invalid",
+      errors,
+    })
+  }
+
+  if (verbose) {
+    for (let i = 0; i < allResults.length; i++) {
+      const file = allResults[i]?.file
+      const result = allResults[i]?.result
+      const errors = allResults[i]?.errors?.map((issue) => {
+        return `- ${issue.message}\n  - File: ${issue.file}\n  - TypePath: ${issue.typePath}`
+      })
+
+      let str
+
+      if (result === "invalid") {
+        str = `Invalid: ${useColor("white", file)}`
+      }
+      else {
+        str = `Valid: ${useColor("white", file)}`
+      }
+
+      if (errors) {
+        str = `${str}\n${useColor("muted", errors.join("\n"))}`
+      }
+
+      if (i === 0) {
+        str = `\n\n${str}`
+      }
+
+      if (i === allResults.length - 1) {
+        str = `${str}\n`
+      }
+
+      if (result === "invalid") {
+        consola.error(str)
+      }
+      else {
+        consola.success(str)
+      }
+    }
   }
 
   validateSpinner.succeed("Finished validation.")
 
+  const writeSpinner = consola.spinner().start("Writing validation results...")
+
+  const allWrites: {
+    file: string
+    error?: string
+  }[] = []
+
+  for (const result of allResults) {
+    if (result.result === "valid") {
+      continue
+    }
+
+    const file = result.file
+    const fileName = basename(file)
+    const outputFile = join(output, `${fileName.replace(/\.json$/, "")}-validation.json`)
+
+    try {
+      await mkdir(output, { recursive: true })
+      await writeFile(outputFile, JSON.stringify(result.errors, null, 2), "utf-8")
+      allWrites.push({ file: outputFile })
+    }
+    catch (error) {
+      allWrites.push({
+        file: outputFile,
+        error: `Failed to write validation result for "${file}": ${error instanceof Error ? error.message : String(error)}`,
+      })
+    }
+  }
+
+  if (verbose) {
+    for (let i = 0; i < allWrites.length; i++) {
+      const file = allWrites[i]?.file
+      const error = allWrites[i]?.error
+
+      let str = `Wrote validation result: ${useColor("white", file)}`
+
+      if (error) {
+        str = `${str}\n${useColor("muted", error)}`
+      }
+
+      if (i === 0) {
+        str = `\n\n${str}`
+      }
+
+      if (i === allWrites.length - 1 || allWrites.length === 1) {
+        str = `${str}\n`
+      }
+
+      consola.debug(str)
+    }
+  }
+
+  writeSpinner.succeed("Finished writing validation results.")
+
+  const validCount = allResults.filter(r => r.result === "valid").length
+  const invalidCount = allResults.filter(r => r.result === "invalid").length
   consola.log(useColor("primary", "\nValidation Summary:"))
   consola.log(useColor("success", `  Valid:`), useColor("white", validCount))
   consola.log(useColor("error", `  Invalid:`), useColor("white", invalidCount))

@@ -7,6 +7,8 @@ import { useConfig } from "./config"
 import { consola, help } from "./consola"
 import { mainMapping } from "./data"
 
+export type { Config } from "./config"
+
 const program = new Command()
   .configureHelp(help)
 

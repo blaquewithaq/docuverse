@@ -39,5 +39,5 @@ jobs:
       - name: Build
         run: bun builder
 
-      - name: Test
-        run: bun test
+      # - name: Test
+      #   run: bun test

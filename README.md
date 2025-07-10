@@ -1,3 +1,3 @@
-# DoxForge
+# Docuverse
 
-A doxygen to markdown converter.
+A tool to generate and mutate documentation from various 3rd party sources into templated markdown.
