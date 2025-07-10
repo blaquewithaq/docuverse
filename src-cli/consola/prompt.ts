@@ -55,14 +55,27 @@ export async function promptWithEnquirer(
   if (changeOptions) {
     const optionQuestions = options.map((opt) => {
       const styledKey = opt.name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
+
+      let type: "input" | "confirm" | "select"
+      if (opt.choices && opt.choices.length > 0) {
+        type = "select"
+      }
+      else if (typeof opt.defaultValue === "boolean") {
+        type = "confirm"
+      }
+      else {
+        type = "input"
+      }
+
       return {
-        type: typeof opt.defaultValue === "boolean" ? "confirm" : "input",
+        type,
         name: `opt-${opt.name}`,
         message: `${useColor("muted", opt.description)}\n${useColor("secondary", styledKey)}`,
         initial:
           typeof providedOpts[opt.name] !== "undefined"
             ? providedOpts[opt.name]
             : opt.defaultValue,
+        choices: opt.choices,
       }
     })
 

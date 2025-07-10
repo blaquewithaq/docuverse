@@ -1,12 +1,10 @@
-// import type { Config } from "docuverse";
-import type { Config } from "./src-cli"
-
 export default {
   run: {
     doxygen: {
       input: "tests",
       output: ".temp",
       options: {
+        generateHtml: true,
         verbose: false,
       },
     },
@@ -29,7 +27,8 @@ export default {
     input: ".temp/json",
     output: ".temp/transmute",
     options: {
+      preset: "basic",
       verbose: false,
     },
   },
-} satisfies Config
+}

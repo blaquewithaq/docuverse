@@ -15,6 +15,7 @@ export interface OptionMapping {
   flags: string
   description: string
   defaultValue?: Value
+  choices?: string[]
 }
 
 export interface CommandMapping {

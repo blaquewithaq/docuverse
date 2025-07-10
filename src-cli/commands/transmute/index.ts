@@ -1,30 +1,8 @@
+import type { TemplateCategory } from "../../templates"
 import type { CommandMapping } from "../../types/data"
 import { action } from "./action"
-import templateDirectory from "./templates/directory.md"
-import templateDoxyfile from "./templates/doxyfile.md"
-import templateIndex from "./templates/index.md"
-import templatePage from "./templates/page.md"
 
 export * from "./action"
-
-export const defaultTemplates = [
-  {
-    name: "doxyfile",
-    content: templateDoxyfile,
-  },
-  {
-    name: "index",
-    content: templateIndex,
-  },
-  {
-    name: "directory",
-    content: templateDirectory,
-  },
-  {
-    name: "page",
-    content: templatePage,
-  },
-]
 
 export const transmuteMapping: CommandMapping = {
   name: "transmute",
@@ -44,6 +22,13 @@ export const transmuteMapping: CommandMapping = {
     },
   ],
   options: [
+    {
+      name: "preset",
+      flags: "--preset <name>",
+      description: "Use a preset template configuration.",
+      defaultValue: "basic",
+      choices: ["basic"] satisfies TemplateCategory[],
+    },
     {
       name: "templateDirectory",
       flags: "--template-directory <directory>",
@@ -87,6 +72,7 @@ export const transmuteMapping: CommandMapping = {
 }
 
 export interface TransmuteOptions {
+  preset?: TemplateCategory
   templateDirectory?: string
   doxyfileTemplate?: string
   indexTemplate?: string
