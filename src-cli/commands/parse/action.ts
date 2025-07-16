@@ -1,10 +1,10 @@
 import type { Command } from "commander"
 import type { Config } from "../../config"
 import type { Value } from "../../types/data"
-import type { XMLDocument } from "~/src"
+import type { Doxygen } from "~/src"
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises"
 import { basename, dirname, extname, join } from "node:path"
-import { Parser } from "~/src"
+import { DoxygenParser } from "~/src"
 import { parseMapping } from "."
 import { consola, promptWithEnquirer, useColor } from "../../consola"
 import { handleMultipleInputs } from "../../utils/input"
@@ -39,7 +39,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
   const output = args[1] as string
   const verbose = options.verbose === true
 
-  const parser = new Parser(options)
+  const parser = new DoxygenParser(options)
   const allFiles: string[] = []
 
   const scanSpinner = consola.spinner().start("Scanning inputs for xml files...")
@@ -54,7 +54,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
         for (const file of files) {
           const filePath = join(entry, file)
           const fileStat = await stat(filePath)
-          if (fileStat.isFile() && extname(file) === ".xml") {
+          if (fileStat.isFile() && extname(file) === ".xml" && !file.toLowerCase().includes("doxyfile")) {
             allFiles.push(filePath)
           }
         }
@@ -100,18 +100,20 @@ export async function action(instance: Command, config: Config): Promise<void> {
 
   const allResults: {
     file: string
-    result: XMLDocument | undefined
+    result: Doxygen | undefined
     error?: string
   }[] = []
 
   for (const file of allFiles) {
     try {
       const xml = await readFile(file, "utf-8")
-      const result = parser.add(xml)
+      const { data, error } = parser.add(xml)
 
-      if (result) {
-        allResults.push({ file, result })
+      if (error) {
+        throw new Error(error)
       }
+
+      allResults.push({ file, result: data })
     }
     catch (error) {
       allResults.push({
@@ -172,7 +174,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
         acc[baseName] = curr.result
       }
       return acc
-    }, {} as Record<string, XMLDocument>)
+    }, {} as Record<string, Doxygen>)
 
     allWrites.push({ file: outputFile, result: JSON.stringify(combinedResults, null, 2) })
   }

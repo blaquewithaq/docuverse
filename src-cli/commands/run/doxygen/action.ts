@@ -2,6 +2,7 @@ import type { Command } from "commander"
 import type { Config } from "../../../config"
 import type { Value } from "../../../types/data"
 import type { Runner } from "~/src"
+import { basename } from "node:path"
 import { useRunner } from "~/src"
 import { runDoxygenMapping, runnerProfile } from "."
 import { consola, promptWithEnquirer, useColor } from "../../../consola"
@@ -27,6 +28,12 @@ export async function action(instance: Command, config: Config): Promise<void> {
 
   const input = handleMultipleInputs(args[0])
   const output = args[1]
+  const stripFromInput = input.map((i) => {
+    const base = basename(i)
+    return i.replace(base, "")
+  })
+
+  console.log("stripFromInput", stripFromInput)
 
   const runner: Runner = {
     ...runnerProfile,
@@ -35,6 +42,7 @@ export async function action(instance: Command, config: Config): Promise<void> {
       ...options,
       input,
       outputDirectory: output,
+      stripFromPath: stripFromInput,
     },
   }
 

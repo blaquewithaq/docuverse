@@ -2,11 +2,11 @@
 const config = {
   run: {
     doxygen: {
-      input: "tests",
+      input: "tests/projectM-4",
       output: ".temp",
       options: {
         generateHtml: true,
-        verbose: false,
+        verbose: true,
       },
     },
   },
@@ -14,7 +14,7 @@ const config = {
     input: ".temp/xml",
     output: ".temp/json",
     options: {
-      verbose: false,
+      verbose: true,
     },
   },
   validate: {
@@ -29,7 +29,7 @@ const config = {
     output: ".temp/transmute",
     options: {
       preset: "basic",
-      verbose: false,
+      verbose: true,
     },
   },
 }

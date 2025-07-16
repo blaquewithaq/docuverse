@@ -22,6 +22,12 @@ export const parseMapping: CommandMapping = {
   ],
   options: [
     {
+      name: "fixLinks",
+      flags: "--fix-links",
+      description: "Fix links in the parsed json files.",
+      defaultValue: true,
+    },
+    {
       name: "singleFile",
       flags: "--single-file",
       description: "Merge multiple xml files into a single json file.",

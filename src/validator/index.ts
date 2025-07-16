@@ -1,5 +1,5 @@
 import { parse } from "json-source-map"
-import { xMLDocumentSchema } from "~/schema"
+import { doxygenSchema } from "~/schema"
 
 /**
  * Represents a validation error in the validation process.
@@ -44,7 +44,7 @@ export async function useValidator(json: string, filePath?: string): Promise<{
 }> {
   try {
     const { data: parsed, pointers } = parse(json)
-    const result = xMLDocumentSchema.safeParse(parsed)
+    const result = doxygenSchema.safeParse(parsed)
 
     if (!result.success) {
       const messages = result.error.errors.map((issue) => {

@@ -1,1 +1,1 @@
-export * from "./xml.schema"
+export * from "./doxygen.schema"

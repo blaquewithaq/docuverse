@@ -4,7 +4,6 @@
 
 ### Parser
 
-- [ ] Fix types in src/parser to match the actual data structure
 - [ ] Add typedoc support: bunx typedoc --json api.json ./src/index.ts
   - https://github.com/RealShadowNova/typedoc-json-parser
 

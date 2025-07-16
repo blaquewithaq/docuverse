@@ -32,7 +32,7 @@ export const transmuteMapping: CommandMapping = {
     {
       name: "templateDirectory",
       flags: "--template-directory <directory>",
-      description: "Directory containing the templates to use. [doxyfile, index, directory, page]",
+      description: "Directory containing the templates to use. [index, directory, page]",
       defaultValue: "",
     },
     {

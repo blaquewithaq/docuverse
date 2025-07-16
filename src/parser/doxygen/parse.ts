@@ -1,5 +1,5 @@
 import type { X2jOptions } from "fast-xml-parser"
-import type { XMLDocument } from "./types"
+import type { Doxygen } from "./types"
 import { XMLParser } from "fast-xml-parser"
 
 export * from "./types"
@@ -7,7 +7,7 @@ export * from "./types"
 /**
  * Type of XML document being parsed.
  */
-type XMLDocumentType = "doxyfile" | "index" | "page"
+type DoxygenType = "index" | "page"
 
 interface InternalOptions {
   /**
@@ -55,36 +55,11 @@ function globalOptions(): InternalOptions {
       "version",
     ],
     isArray: [],
-    transformAttributeName: {
-      refid: "href",
-    },
-    attributeValueProcessor: undefined,
-    transformTagName: {},
-    tagValueProcessor: undefined,
-    updateTag: {},
-  }
-}
-
-/**
- * Returns the options for parsing a Doxyfile XML document.
- * These options are used to configure the XML parser specifically for Doxyfile documents.
- * @returns Options for parsing Doxyfile XML documents.
- */
-function doxyfileOptions(): InternalOptions {
-  return {
-    ignoreAttributes: [],
-    isArray: [
-      "options",
-      "values",
-    ],
     transformAttributeName: {},
     attributeValueProcessor: undefined,
     transformTagName: {},
     tagValueProcessor: undefined,
-    updateTag: {
-      option: "options",
-      value: "values",
-    },
+    updateTag: {},
   }
 }
 
@@ -97,17 +72,22 @@ function indexOptions(): InternalOptions {
   return {
     ignoreAttributes: [],
     isArray: [
-      "pages",
-      "members",
+      "compound",
+      "member",
     ],
-    transformAttributeName: {},
-    attributeValueProcessor: undefined,
+    transformAttributeName: {
+      kindref: "kindRef",
+      refkind: "refKind",
+    },
+    attributeValueProcessor: (_attrName, attrValue) => {
+      return attrValue
+    },
     transformTagName: {},
-    tagValueProcessor: undefined,
+    tagValueProcessor: (_tagName, tagValue) => {
+      return tagValue
+    },
     updateTag: {
       doxygenindex: "index",
-      compound: "pages",
-      member: "members",
     },
   }
 }
@@ -121,309 +101,232 @@ function pageOptions(): InternalOptions {
   return {
     ignoreAttributes: [],
     isArray: [
+      "compoundDef",
+
+      "baseCompoundRef",
+      "derivedCompoundRef",
+      "includedBy",
+      "includes",
+      "innerClass",
+      "innerConcept",
+      "innerDir",
+      "innerFile",
+      "innerGroup",
+      "innerModule",
+      "innerNamespace",
+      "innerPage",
+      "qualifier",
+      "sectionDef",
+
+      "internal",
+      "para",
+      "sect1",
+      "sect2",
+      "sect3",
+      "sect4",
+      "sect5",
+      "sect6",
+
       "anchor",
-      "baseCompoundReferences",
       "blockquote",
       "bold",
       "center",
-      "children",
       "cite",
-      "codeLines",
       "computerOutput",
-      "contents",
       "copyDoc",
       "del",
-      "derivedCompoundReferences",
       "details",
       "diaFile",
-      "docbookOnly",
+      "docBookOnly",
       "dot",
-      "dotFile",
-      "edgeLabels",
+      "dotfile",
       "emoji",
       "emphasis",
-      "entries",
-      "enumValue",
-      "exports",
       "formula",
       "heading",
-      "hRuler",
-      "highlights",
+      "hruler",
       "htmlOnly",
       "image",
-      "includedBy",
-      "includes",
       "indexEntry",
-      "innerClasses",
-      "innerConcepts",
-      "innerDirs",
-      "innerFiles",
-      "innerGroups",
-      "innerModules",
-      "innerNamespaces",
-      "innerPages",
       "ins",
-      "internals",
       "itemizedList",
-      "items",
       "javadocCode",
       "javadocLiteral",
+      "language",
       "latexOnly",
       "linebreak",
-      "list",
       "manOnly",
-      "memberDefs",
-      "members",
       "msc",
-      "names",
-      "nodes",
+      "mscfile",
       "orderedList",
-      "parBlock",
-      "paragraphs",
       "parameterList",
-      "parameters",
-      "plantuml",
-      "plantumlFile",
+      "parBlock",
+      "plantUML",
+      "plantUMLFile",
       "preformatted",
       "programListing",
-      "qualifiers",
       "ref",
-      "referencedBy",
-      "references",
-      "reimplementedBy",
-      "reimplements",
-      "rows",
       "rtfOnly",
       "s",
-      "sections",
-      "simpleSection",
+      "simpleSect",
       "small",
-      "sp",
       "strike",
       "subscript",
       "superscript",
       "table",
       "title",
-      "titles",
       "tocList",
-      "types",
       "uLink",
       "underline",
       "variableList",
       "verbatim",
-      "xRefSect",
       "xmlOnly",
+      "xRefSect",
+
+      "listItem",
+      "parameterItem",
+      "parameterNameList",
+      "parameterName",
+      "parameterType",
+      "codeLine",
+      "highlight",
+      "sp",
+      "row",
+      "entry",
+      "tocItem",
+      "varListEntry",
+      "xRefTitle",
+      "node",
+      "childNode",
+      "edgeLabel",
+      "export",
+      "member",
+      "memberDef",
+      "enumValue",
+      "param",
+      "referencedBy",
+      "references",
+      "reimplementedBy",
+      "reimplements",
+
+      "tableOfContents",
+      "tocSect",
     ],
     transformAttributeName: {
-      file: "href",
-      lang: "language",
+      kindref: "kindRef",
+      refkind: "refKind",
     },
     attributeValueProcessor: (_attrName, attrValue) => {
-      if (typeof attrValue === "string" && attrValue.toLowerCase() === "yes") {
-        return true
-      }
-      else if (typeof attrValue === "string" && attrValue.toLowerCase() === "no") {
-        return false
-      }
-      if (typeof attrValue === "string" && attrValue.toLowerCase() === "func") {
-        return "function"
-      }
-
       return attrValue
     },
     transformTagName: {},
     tagValueProcessor: (_tagName, tagValue) => {
-      if (typeof tagValue === "string" && tagValue.toLowerCase() === "yes") {
-        return true
-      }
-      else if (typeof tagValue === "string" && tagValue.toLowerCase() === "no") {
-        return false
-      }
-
       return tagValue
     },
     updateTag: {
-      // Page
-      doxygen: "page",
-      compounddef: "items",
-
-      // CompoundRefType -> PageBaseCompoundReference
-      prot: "protection",
-      refid: "href",
-      virt: "virtual",
-
-      // ChildnodeType -> PageChildnode
-      edgelabel: "edgeLabels",
-
-      // CodelineType -> PageCodeLine
-      lineno: "lineno",
-      refkind: "refKind",
-      highlight: "highlights",
-
-      // DocEntryType -> PageDocEntry
-      valign: "valign",
-      para: "paragraphs",
-      rowspan: "rowSpan",
-
-      // DocListType -> PageDocList
-      listitem: "items",
-
-      // DocParamListType -> PageDocParameterList
-      parameteritem: "items",
-
-      // DocParamListItem -> PageDocParameterListItem
-      parameterdescription: "description",
-      parameternamelist: "list",
-
-      // DocParamNameList -> PageDocParameterNameList
-      parametername: "names",
-      parametertype: "types",
-
-      // DocParaType -> PageDocParagraph
-      blockquote: "blockquote",
+      compounddef: "compoundDef",
+      basecompoundref: "baseCompoundRef",
+      briefdescription: "briefDescription",
+      collaborationgraph: "collaborationGraph",
+      compoundname: "compoundName",
+      derivedcompoundref: "derivedCompoundRef",
+      detaileddescription: "detailedDescription",
+      incdepgraph: "incDepGraph",
+      includedby: "includedBy",
+      inheritancegraph: "inheritanceGraph",
+      innerclass: "innerClass",
+      innerconcept: "innerConcept",
+      innerdir: "innerDir",
+      innerfile: "innerFile",
+      innergroup: "innerGroup",
+      innermodule: "innerModule",
+      innernamespace: "innerNamespace",
+      innerpage: "innerPage",
+      invincdepgraph: "invIncDepGraph",
+      listofallmembers: "listOfAllMembers",
+      programlisting: "programListing",
+      requiresclause: "requiresClause",
+      sectiondef: "sectionDef",
+      tableofcontents: "tableOfContents",
+      templateparamlist: "templateParamList",
+      computeroutput: "computerOutput",
       copydoc: "copyDoc",
       diafile: "diaFile",
-      dotfile: "dotFile",
-      hruler: "hRuler",
+      docbookonly: "docBookOnly",
+      htmlonly: "htmlOnly",
       indexentry: "indexEntry",
       itemizedlist: "itemizedList",
       javadoccode: "javadocCode",
       javadocliteral: "javadocLiteral",
+      latexonly: "latexOnly",
+      manonly: "manOnly",
       orderedlist: "orderedList",
       parameterlist: "parameterList",
       parblock: "parBlock",
-      plantumlfile: "plantumlFile",
-      programlisting: "programListing",
-      simplesect: "simpleSection",
-      toclist: "tocList",
-      variablelist: "variableList",
-      xrefsect: "xRefSect",
-      computeroutput: "computerOutput",
-      docbookonly: "docbookOnly",
-      htmlonly: "htmlOnly",
-      latexonly: "latexOnly",
-      manonly: "manOnly",
+      plantuml: "plantUML",
+      plantumlfile: "plantUMLFile",
       rtfonly: "rtfOnly",
+      simplesect: "simpleSect",
+      toclist: "tocList",
       ulink: "uLink",
+      variablelist: "variableList",
       xmlonly: "xmlOnly",
-
-      // RefTextType -> PageDocReferenceText
-      // DocRefTextType -> PageDocReferenceText
-      kindref: "kindReference",
-      external: "external",
-
-      // DocTableType -> PageDocTable
-      cols: "columnCount",
-      rows: "rowCount",
-      row: "rows",
-
-      // DocTocListType -> PageDocTocList
-      tocitem: "items",
-
-      // DocURLLink -> PageDocURLLink
-      url: "href",
-
-      // DocVariableListType -> PageDocVariableList
-      varlistentry: "entries",
-
-      // DocXRefSectType -> PageDocXRefSect
-      xrefdescription: "description",
-      xreftitle: "titles",
-
-      // EnumvalueType -> PageEnumValue
-      briefdescription: "briefDescription",
-      detaileddescription: "detailedDescription",
-
-      // ExportsType -> PageExports
-      export: "exports",
-
-      // GraphType -> PageGraph
-      node: "nodes",
-
-      // HighlightType -> PageHighlight
-      class: "class",
-
-      // CompounddefType -> PageItem
-      compoundname: "name",
-      basecompoundref: "baseCompoundReferences",
-      derivedcompoundref: "derivedCompoundReferences",
-      collaborationgraph: "collaborationGraph",
-      incdepgraph: "includeDependencyGraph",
-      includedby: "includedBy",
-      inheritancegraph: "inheritanceGraph",
-      innerclass: "innerClasses",
-      innerconcept: "innerConcepts",
-      innerdir: "innerDirs",
-      innerfile: "innerFiles",
-      innergroup: "innerGroups",
-      innermodule: "innerModules",
-      innernamespace: "innerNamespaces",
-      innerpage: "innerPages",
-      invincdepgraph: "inverseIncludeDependencyGraph",
-      listofallmembers: "listOfAllMembers",
-      qualifier: "qualifiers",
-      requiresclause: "requiresClause",
-      sectiondef: "sections",
-      tableofcontents: "tableOfContents",
-      templateparamlist: "templateParamList",
-
-      // ListofallmembersType -> PageListOfAllMembers
-      member: "members",
-
-      // LocationType -> PageLocation
-      file: "href",
-
-      // MemberdefType -> PageMemberDef
-      argsstring: "argsString",
-      bitfield: "bitField",
-      enumvalue: "enumValue",
-      inbodydescription: "inBodyDescription",
+      xrefsect: "xRefSect",
+      colspan: "colSpan",
+      rowspan: "rowSpan",
+      primaryie: "primary",
+      secondaryie: "secondary",
+      langid: "langId",
+      parameteritem: "parameterItem",
+      parameterdescription: "parameterDescription",
+      parameternamelist: "parameterNameList",
+      parametername: "parameterName",
+      parametertype: "parameterType",
+      codeline: "codeLine",
+      tocitem: "tocItem",
+      listitem: "listItem",
+      varlistentry: "varListEntry",
+      xrefdescription: "xRefDescription",
+      xreftitle: "xRefTitle",
+      childnode: "childNode",
+      edgelabel: "edgeLabel",
+      ambiguityscope: "ambiguityScope",
+      bodyend: "bodyEnd",
+      bodyfile: "bodyFile",
+      bodystart: "bodyStart",
+      declcolumn: "declColumn",
+      declfile: "declFile",
+      declline: "declLine",
+      memberdef: "memberDef",
+      consteval: "constEval",
+      constexpr: "constExpr",
+      constinit: "constInit",
       initonly: "initOnly",
       maybeambiguous: "maybeAmbiguous",
       maybedefault: "maybeDefault",
       maybevoid: "maybeVoid",
       nodiscard: "noDiscard",
       noexceptexpression: "noExceptExpression",
-      param: "parameters",
       privategettable: "privateGettable",
       privatesettable: "privateSettable",
       protectedgettable: "protectedGettable",
       protectedsettable: "protectedSettable",
+      refqual: "refQual",
+      argsstring: "argsString",
+      bitfield: "bitField",
+      enumvalue: "enumValue",
+      inbodydescription: "inBodyDescription",
       qualifiedname: "qualifiedName",
       referencedby: "referencedBy",
-      refqual: "refQualifier",
       reimplementedby: "reimplementedBy",
-      static: "static",
-
-      // MemberRefType -> PageMemberReference
-      ambiguityscope: "ambiguityScope",
-
-      // NodeType -> PageNode
-      childnode: "children",
-
-      // DescriptionType -> PageDescription
-      internal: "internals",
-      sect1: "sections",
-      sect2: "sections",
-      sect3: "sections",
-      sect4: "sections",
-      sect5: "sections",
-      sect6: "sections",
-
-      // ParamType -> PageParameter
       declname: "declName",
       defname: "defName",
       defval: "defVal",
       typeconstraint: "typeConstraint",
-
-      // ListingType -> PageProgramListing
-      codeline: "codeLines",
-
-      // SectiondefType -> PageSection
-      memberdef: "memberDefs",
-
-      // TableofcontentsType -> PageTableOfContents
-      tocsect: "sections",
+      compoundref: "compoundRef",
+      endline: "endLine",
+      startline: "startLine",
+      tocsect: "tocSect",
     },
   }
 }
@@ -433,9 +336,9 @@ function pageOptions(): InternalOptions {
  * This function recursively traverses the object and removes any properties
  * that are undefined or empty strings.
  * @param json The JSON object to clean.
- * @returns A new JSON object with undefined and empty string values removed.
+ * @returns The updated Doxygen JSON object with undefined and empty string values removed.
  */
-function removeUndefined(json: Document): Document {
+function removeUndefined(json: Doxygen): Doxygen {
   const clean = (obj: any): any => {
     if (Array.isArray(obj)) {
       return obj
@@ -461,6 +364,50 @@ function removeUndefined(json: Document): Document {
 }
 
 /**
+ * Fixes links in the Doxygen JSON object.
+ * This function updates the `refid` and `member.refid` properties
+ * to ensure they are correctly formatted.
+ * @param json The Doxygen JSON object to fix.
+ * @returns The updated Doxygen JSON object with fixed links.
+ */
+// function fixLinks(json: Doxygen): Doxygen {
+//   if ("index" in json) {
+//     json = {
+//       ...json,
+//       index: {
+//         ...json.index,
+//         compound: json.index?.compound?.map(compound => ({
+//           ...compound,
+//           refid: compound.name || compound.refid || "",
+//           member: compound.member?.map(member => ({
+//             ...member,
+//             refid: `${compound.name}#${member.name}` || member.refid || "",
+//           })),
+//         })),
+//       },
+//     }
+//   }
+//   else if ("doxygen" in json) {
+//     json = {
+//       ...json,
+//       doxygen: {
+//         ...json.doxygen,
+//         compoundDef: json.doxygen?.compoundDef?.map(compound => ({
+//           ...compound,
+//           refid: compound.name || compound.refid || "",
+//           memberDef: compound.memberDef?.map(member => ({
+//             ...member,
+//             refid: `${compound.name}#${member.name}` || member.refid || "",
+//           })),
+//         })),
+//       },
+//     }
+//   }
+
+//   return json
+// }
+
+/**
  * Options for configuring the XML parser.
  * This interface extends the `X2jOptions` from the `fast-xml-parser` library
  * It allows customization of how XML is parsed into a JavaScript object.
@@ -468,13 +415,17 @@ function removeUndefined(json: Document): Document {
 export interface XMLParserOptions extends X2jOptions {}
 
 /**
- *  Parses an XML string into a JavaScript object.
+ *  Parses a Doxygen XML document and returns it as a JavaScript object.
  *  @param xml XML string to parse
  *  @param options Optional configuration for the XML parser.
  *  @returns Parsed XML document as a JavaScript object.
  */
-export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocument {
-  let docType: XMLDocumentType = "page"
+export function useDoxygenParser(xml: string, options?: XMLParserOptions): { data?: Doxygen, error?: string } {
+  if (!xml.startsWith("<?xml")) {
+    return { data: undefined, error: "Invalid xml source code." }
+  }
+
+  let docType: DoxygenType = "page"
 
   const defaultOptions: X2jOptions = {
     allowBooleanAttributes: true,
@@ -507,11 +458,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
       const mapping = []
       mapping.push(...globalOptions().ignoreAttributes)
 
-      if (jPath.includes("doxyfile")) {
-        docType = "doxyfile"
-        mapping.push(...doxyfileOptions().ignoreAttributes)
-      }
-      else if (jPath.includes("doxygenindex")) {
+      if (jPath.includes("doxygenindex")) {
         docType = "index"
         mapping.push(...indexOptions().ignoreAttributes)
       }
@@ -530,11 +477,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
       const mapping = []
       mapping.push(...globalOptions().isArray)
 
-      if (jPath.includes("doxyfile")) {
-        docType = "doxyfile"
-        mapping.push(...doxyfileOptions().isArray)
-      }
-      else if (jPath.includes("index")) {
+      if (jPath.includes("index")) {
         docType = "index"
         mapping.push(...indexOptions().isArray)
       }
@@ -553,10 +496,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
     transformAttributeName: (attributeName) => {
       const mapping: Record<string, string> = Object.assign({}, globalOptions().transformAttributeName)
 
-      if (docType === "doxyfile") {
-        Object.assign(mapping, doxyfileOptions().transformAttributeName)
-      }
-      else if (docType === "index") {
+      if (docType === "index") {
         Object.assign(mapping, indexOptions().transformAttributeName)
       }
       else {
@@ -574,10 +514,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
         ? globalOptions().attributeValueProcessor?.(_attrName, attrValue)
         : attrValue
 
-      if (jPath.includes("doxyfile")) {
-        newValue = doxyfileOptions().attributeValueProcessor?.(_attrName, newValue)
-      }
-      else if (jPath.includes("doxygenindex")) {
+      if (jPath.includes("doxygenindex")) {
         newValue = indexOptions().attributeValueProcessor?.(_attrName, newValue)
       }
       else {
@@ -589,10 +526,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
     transformTagName: (tagName) => {
       const mapping: Record<string, string> = Object.assign({}, globalOptions().transformTagName)
 
-      if (docType === "doxyfile") {
-        Object.assign(mapping, doxyfileOptions().transformTagName)
-      }
-      else if (docType === "index") {
+      if (docType === "index") {
         Object.assign(mapping, indexOptions().transformTagName)
       }
       else {
@@ -610,10 +544,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
         ? globalOptions().tagValueProcessor?.(tagName, tagValue)
         : tagValue
 
-      if (jPath.includes("doxyfile")) {
-        newValue = doxyfileOptions().tagValueProcessor?.(tagName, tagValue)
-      }
-      else if (jPath.includes("doxygenindex")) {
+      if (jPath.includes("doxygenindex")) {
         newValue = indexOptions().tagValueProcessor?.(tagName, tagValue)
       }
       else {
@@ -625,11 +556,7 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
     updateTag(tagName, jPath, _attributes) {
       const mapping: Record<string, string> = Object.assign({}, globalOptions().updateTag)
 
-      if (jPath.includes("doxyfile")) {
-        docType = "doxyfile"
-        Object.assign(mapping, doxyfileOptions().updateTag)
-      }
-      else if (jPath.includes("doxygenindex")) {
+      if (jPath.includes("doxygenindex")) {
         docType = "index"
         Object.assign(mapping, indexOptions().updateTag)
       }
@@ -654,7 +581,8 @@ export function useXmlParser(xml: string, options?: XMLParserOptions): XMLDocume
   }
 
   const parser = new XMLParser(defaultOptions)
-  const json = parser.parse(xml) as XMLDocument
+  let json = parser.parse(xml) as Doxygen
+  json = removeUndefined(json)
 
-  return removeUndefined(json)
+  return { data: json, error: undefined }
 }

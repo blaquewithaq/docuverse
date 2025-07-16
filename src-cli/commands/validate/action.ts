@@ -139,7 +139,8 @@ export async function action(instance: Command, config: Config): Promise<void> {
       }
 
       if (i === 0) {
-        str = `\n\n${str}`
+        consola.log("\n")
+        str = `${str}`
       }
 
       if (i === allResults.length - 1) {
@@ -209,7 +210,11 @@ export async function action(instance: Command, config: Config): Promise<void> {
     }
   }
 
-  writeSpinner.success("Finished writing validation results.")
+  writeSpinner.success(
+    allWrites.length > 0
+      ? "Finished writing validation results."
+      : "No validation results to write.",
+  )
 
   const validCount = allResults.filter(r => r.result === "valid").length
   const invalidCount = allResults.filter(r => r.result === "invalid").length

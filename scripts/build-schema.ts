@@ -18,14 +18,14 @@ const SCHEMA = "./schema"
 
 const DATA = [
   {
-    name: "xml",
-    description: "XML parser",
+    name: "doxygen",
+    description: "Doxygen xml parser",
     typescript: {
-      input: "./src/parser/xml/types/index.ts",
+      input: "./src/parser/doxygen/types/index.ts",
       outputDir: SCHEMA,
     },
     schema: {
-      input: `${SCHEMA}/xml.d.ts`,
+      input: `${SCHEMA}/doxygen.d.ts`,
       outputDir: SCHEMA,
     },
   },

@@ -279,7 +279,7 @@ export interface DoxygenOptions {
   strictPrototypeMatching?: boolean
   stripCodeComments?: boolean
   stripFromIncludePath?: string
-  stripFromPath?: string
+  stripFromPath?: string[]
   subgrouping?: boolean
   tabSize?: number
   tagFiles?: string[]
@@ -950,7 +950,7 @@ const doxygenConfigDefaults: Partial<DoxygenOptions> = {
   strictPrototypeMatching: false,
   stripCodeComments: true,
   stripFromIncludePath: "",
-  stripFromPath: "",
+  stripFromPath: [],
   subgrouping: true,
   tabSize: 4,
   tagFiles: [],

@@ -1,42 +1,34 @@
-import type { Doxyfile } from "./doxyfile"
-import type { Page } from "./page"
+import type { DoxygenPage } from "./page"
 
-export * from "./doxyfile"
 export * from "./page"
 export * from "./page-enums"
 
-export interface XMLDocument {
-  doxyfile?: Doxyfile
-  index?: Index
-  page?: Page
+export interface Doxygen {
+  index?: DoxygenIndex
+  doxygen?: DoxygenPage
 }
 
-export interface Index {
-  title?: string
-  description?: string
-  pages?: IndexPage[]
-
-  language?: string
+export interface DoxygenIndex {
+  compound?: DoxygenIndexCompound[]
+  lang?: string
 }
 
-export interface IndexPage {
+export interface DoxygenIndexCompound {
   name?: string
-  description?: string
-  members?: IndexMember[]
-
+  member?: DoxygenIndexMember[]
+  refid?: string
   href?: string
-  kind?: IndexPageKind
+  kind?: DoxygenIndexCompoundKind
 }
 
-export interface IndexMember {
+export interface DoxygenIndexMember {
   name?: string
-  description?: string
-
+  refid?: string
   href?: string
-  kind?: IndexMemberKind
+  kind?: DoxygenIndexMemberKind
 }
 
-export type IndexPageKind
+export type DoxygenIndexCompoundKind
   = | "category"
     | "class"
     | "concept"
@@ -54,7 +46,7 @@ export type IndexPageKind
     | "type"
     | "union"
 
-export type IndexMemberKind
+export type DoxygenIndexMemberKind
   = | "dcop"
     | "define"
     | "enum"
